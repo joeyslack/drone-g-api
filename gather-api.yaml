@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gather-api
+  namespace: gatherai-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gather-api
+  template:
+    metadata:
+      labels:
+        app: gather-api
+    spec:
+      containers:
+      - name: gather-api
+        image: gatherai.azurecr.io/gather-api:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 250m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_HOST
+          value: "gather-staging-1.postgres.database.azure.com"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_USER
+          value: "gatherAdmin@gather-staging-1"
+        - name: DATABASE_PASSWORD
+          value: "yF6twFVSg4ts8TRv"
+        - name: DATABASE
+          value: "gather"
+        - name: TYPEORM_CONNECTION
+          value: "postgres"
+        - name: TYPEORM_HOST
+          value: "gather-staging-1.postgres.database.azure.com"
+        - name: TYPEORM_USERNAME
+          value: "gatherAdmin@gather-staging-1"
+        - name: TYPEORM_PASSWORD
+          value: "yF6twFVSg4ts8TRv"
+        - name: TYPEORM_DATABASE
+          value: "gather"
+        - name: TYPEORM_PORT
+          value: "5432"
+        - name: TYPEORM_SYNCHRONIZE
+          value: "true"
+        - name: TYPEORM_LOGGING
+          value: "false"
+        - name: TYPEORM_ENTITIES
+          value: "src/**/*.entity.js,src/**/*.entity.ts"
+        - name: PROCESS_HOST
+          value: "https://gather-upload-functions.azurewebsites.net"
+        - name: PROCESS_BUCKET
+          value: "ben-e-keith"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gather-api
+  namespace: gatherai-backend
+  # annotations:
+  #   service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: gather-api
+---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: gather-ingress
+#   annotations:
+#     kubernetes.io/ingress.class: nginx
+#     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   backend:
+#     serviceName: gather-api
+#     servicePort: 3000
+# apiVersion: networking.k8s.io/v1beta1
+# kind: Ingress
+# metadata:
+#   name: gather-ingress
+# spec:
+#   backend:
+#     serviceName: gather-api
+#     servicePort: 3000
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gatherai-backend-ingress
+  namespace: gatherai-backend
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  tls:
+  - hosts:
+    - 'benekeith-api.gather-ai.com'
+    secretName: aks-ingress-tls
+  rules:
+  - host: 'benekeith-api.gather-ai.com'
+    http:
+      paths:
+      - backend:
+          serviceName: gather-api
+          servicePort: 80
+        path: /

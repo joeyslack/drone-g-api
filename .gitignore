@@ -1,0 +1,57 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+migrations-bak/
+nohup*
+
+
+.env
+.development.env
+.*.env
+.production.env
+Dockerfile.dev
+Dockerfile.production
+azure.deploy.sh
+db.json
+/db_dump
+/dist
+/migrations
+/migrations-bak
+nohup
+nohup.nyc_output
+ormconfig.json
+ormconfig.*.json
+seed.sh
+/test
